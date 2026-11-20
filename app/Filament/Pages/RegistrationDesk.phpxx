@@ -1,0 +1,452 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use Filament\Pages\Page;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use App\Models\Guest;
+use App\Models\Event;
+use App\Models\Tenant;
+use App\Models\Table;
+use App\Models\Attendance;
+use Illuminate\Support\Str;
+use Filament\Notifications\Notification;
+use Filament\Forms;
+use Filament\Forms\Components\Hidden;
+
+class RegistrationDesk extends Page
+{
+    protected static ?string $navigationIcon = 'heroicon-o-qr-code';
+    protected static ?string $navigationLabel = 'Meja Registrasi';
+    protected static ?string $title = 'Dashboard Meja Registrasi';
+    protected static ?string $slug = 'meja-registrasi';
+    protected static ?int $navigationSort = 1;
+
+    protected static string $view = 'filament.pages.registration-desk';
+
+    public ?string $search_query = '';
+    public ?int $selected_event_id = null;
+
+    public function mount(): void
+    {
+        $activeEvent = Event::where('is_active', true)->latest()->first();
+        $this->selected_event_id = $activeEvent?->id;
+    }
+
+    public static function canAccess(): bool
+    {
+        return in_array(auth()->user()->role, ['admin', 'register']);
+    }
+
+    // Menerima input dari scanner fisik (search_query) atau parameter string dari kamera
+    public function processScan(?string $code = null): void
+    {
+        $query = trim($code ?? $this->search_query);
+        if (empty($query)) return;
+
+        if (!$this->selected_event_id) {
+            Notification::make()
+                ->warning()
+                ->title('Pilih Acara Terlebih Dahulu')
+                ->send();
+            return;
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $query);
+
+        $guest = Guest::where('event_id', $this->selected_event_id)
+            ->where(function ($q) use ($query, $cleanPhone) {
+                $q->where('qr_code', $query)
+                  ->orWhere('name', 'like', "%{$query}%");
+
+                if (!empty($cleanPhone)) {
+                    $q->orWhere('phone', 'like', "%{$cleanPhone}%");
+                }
+            })
+            ->first();
+
+        $this->search_query = '';
+
+        if (!$guest) {
+            Notification::make()
+                ->danger()
+                ->title('Tamu Tidak Ditemukan')
+                ->body("Tidak ditemukan data tamu untuk input: '{$query}'.")
+                ->send();
+            return;
+        }
+
+        // Tampilkan Modal Konfirmasi & Koreksi Data
+        $this->mountAction('confirmCheckIn', ['guest_id' => $guest->id]);
+    }
+
+   // Action Modal: Konfirmasi & Validasi Kehadiran Tamu Beserta Profil Lengkap
+    public function confirmCheckInAction(): Action
+    {
+        return Action::make('confirmCheckIn')
+            ->label('Konfirmasi Kedatangan')
+            ->modalHeading('Konfirmasi & Koreksi Data Tamu')
+            ->modalWidth('2xl')
+            ->fillForm(function (array $arguments) {
+                $guest = Guest::with(['attendance', 'table', 'tenant'])->findOrFail($arguments['guest_id']);
+                
+                return [
+                    'guest_id' => $guest->id,
+                    'name' => $guest->name,
+                    'phone' => $guest->phone,
+                    'gender' => $guest->gender,
+                    'job_type' => $guest->job_type,
+                    'tenant_name' => $guest->tenant?->name ?? 'Tanpa Pengundang',
+                    'table_id' => $guest->table_id,
+                    'adult_count' => $guest->attendance?->adult_count ?? $guest->adult_pax ?? 2,
+                    'child_count' => $guest->attendance?->child_count ?? $guest->child_pax ?? 0,
+                    'is_already_attended' => (bool) $guest->is_attended,
+                ];
+            })
+            ->form([
+                // PERBAIKAN UTAMA: Tambahkan Hidden Input agar guest_id tetap terbawa saat form di-submit
+                Hidden::make('guest_id')->required(),
+
+                Placeholder::make('status_info')
+                    ->label('Status Kehadiran')
+                    ->content(fn ($get) => $get('is_already_attended') 
+                        ? '⚠️ Tamu ini SUDAH CHECK-IN sebelumnya. Menyimpan ulang akan memperbarui data profil & kehadiran.' 
+                        : '🟢 Tamu Belum Hadir. Silakan verifikasi / lengkapi data di bawah.')
+                    ->extraAttributes(fn ($get) => [
+                        'class' => $get('is_already_attended') ? 'text-amber-600 font-semibold text-sm' : 'text-emerald-600 font-semibold text-sm',
+                    ]),
+
+                Placeholder::make('tenant_name')
+                    ->label('Tenant Pengundang')
+                    ->content(fn ($get) => $get('tenant_name')),
+
+                // DATA IDENTITAS TAMU (DAPAT DIKOREKSI)
+                Forms\Components\Section::make('Identitas Tamu')
+                    ->description('Perbarui jika ada perubahan nomor HP atau salah penulisan')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('name')
+                                ->label('Nama Tamu')
+                                ->required()
+                                ->maxLength(255),
+
+                            TextInput::make('phone')
+                                ->label('No. Handphone / WhatsApp')
+                                ->tel()
+                                ->placeholder('Contoh: 081234567890')
+                                ->maxLength(25),
+                        ]),
+
+                        Grid::make(2)->schema([
+                            Select::make('gender')
+                                ->label('Jenis Kelamin')
+                                ->options([
+                                    'L' => 'Laki-laki',
+                                    'P' => 'Perempuan',
+                                ])
+                                ->placeholder('Pilih Gender'),
+
+                            TextInput::make('job_type')
+                                ->label('Pekerjaan / Instansi')
+                                ->placeholder('Contoh: Wiraswasta, PNS, BUMN')
+                                ->maxLength(255),
+                        ]),
+                    ])
+                    ->compact(),
+
+                // DATA KEHADIRAN & KURSI RIIL
+                Forms\Components\Section::make('Kehadiran & Meja')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('adult_count')
+                                ->label('Dewasa Hadir (Riil)')
+                                ->numeric()
+                                ->minValue(1)
+                                ->required(),
+
+                            TextInput::make('child_count')
+                                ->label('Anak Hadir (Riil)')
+                                ->numeric()
+                                ->minValue(0)
+                                ->required(),
+                        ]),
+
+                        Select::make('table_id')
+                            ->label('Alokasi Meja')
+                            ->options(function (Forms\Get $get) {
+                                if (!$this->selected_event_id) return [];
+
+                                $currentGuestId = $get('guest_id');
+
+                                return Table::where('event_id', $this->selected_event_id)
+                                    ->get()
+                                    ->mapWithKeys(function ($table) use ($currentGuestId) {
+                                        $guestIds = $table->guests()->pluck('id');
+
+                                        $attendedSeats = Attendance::whereIn('guest_id', $guestIds)
+                                            ->where('guest_id', '!=', $currentGuestId)
+                                            ->selectRaw('SUM(adult_count + child_count) as total')
+                                            ->value('total') ?? 0;
+
+                                        $unattendedSeats = $table->guests()
+                                            ->where('id', '!=', $currentGuestId)
+                                            ->whereNotIn('id', Attendance::whereIn('guest_id', $guestIds)->pluck('guest_id'))
+                                            ->selectRaw('SUM(adult_pax + child_pax) as total')
+                                            ->value('total') ?? 0;
+
+                                        $remaining = $table->capacity - ($attendedSeats + $unattendedSeats);
+                                        return [$table->id => "{$table->name} (Sisa: {$remaining} Kursi / Kap: {$table->capacity})"];
+                                    });
+                            })
+                            ->searchable()
+                            ->placeholder('Tanpa Meja'),
+                    ])
+                    ->compact(),
+            ])
+            ->action(function (array $data, array $arguments, Action $action) {
+                // Ambil guest_id dari $data (komponen Hidden) atau dari $arguments sebagai cadangan
+                $guestId = $data['guest_id'] ?? ($arguments['guest_id'] ?? null);
+
+                if (!$guestId) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Gagal Memproses')
+                        ->body('ID Tamu tidak ditemukan.')
+                        ->send();
+                    $action->halt();
+                }
+
+                $guest = Guest::findOrFail($guestId);
+                $adults = (int) $data['adult_count'];
+                $children = (int) $data['child_count'];
+                $totalRealSeats = $adults + $children;
+
+                // Validasi kapasitas meja
+                if (!empty($data['table_id'])) {
+                    $table = Table::find($data['table_id']);
+                    $guestIds = $table->guests()->pluck('id');
+
+                    $attendedSeats = Attendance::whereIn('guest_id', $guestIds)
+                        ->where('guest_id', '!=', $guest->id)
+                        ->selectRaw('SUM(adult_count + child_count) as total')
+                        ->value('total') ?? 0;
+
+                    $unattendedSeats = $table->guests()
+                        ->where('id', '!=', $guest->id)
+                        ->whereNotIn('id', Attendance::whereIn('guest_id', $guestIds)->pluck('guest_id'))
+                        ->selectRaw('SUM(adult_pax + child_pax) as total')
+                        ->value('total') ?? 0;
+
+                    $availableSeats = $table->capacity - ($attendedSeats + $unattendedSeats);
+
+                    if ($totalRealSeats > $availableSeats) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Kapasitas Meja Tidak Cukup!')
+                            ->body("Meja {$table->name} hanya tersisa {$availableSeats} kursi, namun rombongan ini berjumlah {$totalRealSeats} orang.")
+                            ->send();
+
+                        $action->halt();
+                    }
+                }
+
+                // 1. Update data profil & meja tamu
+                $guest->update([
+                    'name' => $data['name'],
+                    'phone' => $data['phone'] ?? null,
+                    'gender' => $data['gender'] ?? null,
+                    'job_type' => $data['job_type'] ?? null,
+                    'table_id' => $data['table_id'] ?? null,
+                    'is_attended' => true,
+                ]);
+
+                // 2. Simpan atau perbarui log kehadiran di tabel attendances
+                Attendance::updateOrCreate(
+                    ['guest_id' => $guest->id],
+                    [
+                        'user_id' => auth()->id(),
+                        'adult_count' => $adults,
+                        'child_count' => $children,
+                        'scanned_at' => now(),
+                    ]
+                );
+
+                Notification::make()
+                    ->success()
+                    ->title('Check-in Berhasil!')
+                    ->body("Data {$guest->name} berhasil diperbarui & dicatat hadir.")
+                    ->send();
+            });
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('add_walk_in')
+                ->label('Tambah Tamu Walk-In')
+                ->icon('heroicon-o-user-plus')
+                ->color('primary')
+                ->form([
+                    Select::make('event_id')
+                        ->label('Pilih Event')
+                        ->options(Event::where('is_active', true)->pluck('name', 'id'))
+                        ->default(fn () => $this->selected_event_id)
+                        ->required()
+                        ->live(),
+
+                    TextInput::make('name')
+                        ->label('Nama Tamu')
+                        ->required()
+                        ->maxLength(255),
+
+                    TextInput::make('phone')
+                        ->label('No. Handphone')
+                        ->tel()
+                        ->maxLength(20),
+
+                    Grid::make(2)->schema([
+                        TextInput::make('adult_count')
+                            ->label('Jml Dewasa')
+                            ->numeric()
+                            ->default(1)
+                            ->minValue(1)
+                            ->required(),
+                            
+                        TextInput::make('child_count')
+                            ->label('Jml Anak')
+                            ->numeric()
+                            ->default(0)
+                            ->minValue(0)
+                            ->required(),
+                    ]),
+
+                    Select::make('tenant_id')
+                        ->label('Tenant Pengundang (Atau Tambah Baru)')
+                        ->options(Tenant::pluck('name', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm([
+                            TextInput::make('name')
+                                ->label('Nama Tenant Baru')
+                                ->required()
+                                ->maxLength(255),
+                        ])
+                        ->createOptionUsing(function (array $data) {
+                            $data['user_id'] = auth()->id(); 
+                            $tenant = Tenant::create($data);
+                            return $tenant->id;
+                        }),
+
+                    Select::make('table_id')
+                        ->label('Plot Meja (Opsional)')
+                        ->options(function (Forms\Get $get) {
+                            $eventId = $get('event_id') ?? $this->selected_event_id;
+                            if (!$eventId) return [];
+
+                            return Table::where('event_id', $eventId)
+                                ->get()
+                                ->mapWithKeys(function ($table) {
+                                    $guestIds = $table->guests()->pluck('id');
+                                    
+                                    $attendedSeats = Attendance::whereIn('guest_id', $guestIds)
+                                        ->selectRaw('SUM(adult_count + child_count) as total')
+                                        ->value('total') ?? 0;
+                                        
+                                    $unattendedSeats = $table->guests()
+                                        ->whereNotIn('id', Attendance::whereIn('guest_id', $guestIds)->pluck('guest_id'))
+                                        ->selectRaw('SUM(adult_pax + child_pax) as total')
+                                        ->value('total') ?? 0;
+                                        
+                                    $remaining = $table->capacity - ($attendedSeats + $unattendedSeats);
+                                    if ($remaining <= 0) return []; 
+                                    return [$table->id => "{$table->name} (Sisa: {$remaining} Kursi)"];
+                                });
+                        })
+                        ->searchable(),
+                ])
+                ->action(function (array $data, Action $action) {
+                    $adults = (int) $data['adult_count'];
+                    $children = (int) $data['child_count'];
+
+                    if (!empty($data['table_id'])) {
+                        $table = Table::find($data['table_id']);
+                        $guestIds = $table->guests()->pluck('id');
+                        
+                        $attendedSeats = Attendance::whereIn('guest_id', $guestIds)
+                            ->selectRaw('SUM(adult_count + child_count) as total')
+                            ->value('total') ?? 0;
+                            
+                        $unattendedSeats = $table->guests()
+                            ->whereNotIn('id', Attendance::whereIn('guest_id', $guestIds)->pluck('guest_id'))
+                            ->selectRaw('SUM(adult_pax + child_pax) as total')
+                            ->value('total') ?? 0;
+                            
+                        $remaining = $table->capacity - ($attendedSeats + $unattendedSeats);
+                        
+                        if (($adults + $children) > $remaining) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Kapasitas Meja Penuh!')
+                                ->body("Meja {$table->name} hanya tersisa {$remaining} kursi.")
+                                ->send();
+                            $action->halt();
+                        }
+                    }
+
+                    $newGuest = Guest::create([
+                        'event_id' => $data['event_id'],
+                        'name' => $data['name'],
+                        'phone' => $data['phone'] ?? null,
+                        'tenant_id' => $data['tenant_id'] ?? null,
+                        'table_id' => $data['table_id'] ?? null,
+                        'adult_pax' => $adults,
+                        'child_pax' => $children,
+                        'is_attended' => true,
+                        'job_type' => 'Walk-In',
+                        'qr_code' => (string) Str::uuid(),
+                    ]);
+
+                    Attendance::create([
+                        'guest_id' => $newGuest->id,
+                        'user_id' => auth()->id(),
+                        'scanned_at' => now(),
+                        'adult_count' => $adults,
+                        'child_count' => $children,
+                    ]);
+
+                    Notification::make()
+                        ->success()
+                        ->title('Tamu Walk-In Berhasil Didaftarkan & Check-in!')
+                        ->send();
+                }),
+        ];
+    }
+
+    public function getSummaryProperty(): array
+    {
+        if (!$this->selected_event_id) {
+            return ['total' => 0, 'attended' => 0, 'unattended' => 0, 'adults' => 0, 'children' => 0];
+        }
+
+        $totalGuests = Guest::where('event_id', $this->selected_event_id)->count();
+        $attendedGuests = Guest::where('event_id', $this->selected_event_id)->where('is_attended', true)->count();
+
+        // Menggunakan join ke tabel guests untuk memfilter event_id yang benar
+        $attendanceStats = Attendance::join('guests', 'attendances.guest_id', '=', 'guests.id')
+            ->where('guests.event_id', $this->selected_event_id)
+            ->selectRaw('COALESCE(SUM(attendances.adult_count), 0) as total_adults, COALESCE(SUM(attendances.child_count), 0) as total_children')
+            ->first();
+
+        return [
+            'total' => $totalGuests,
+            'attended' => $attendedGuests,
+            'unattended' => $totalGuests - $attendedGuests,
+            'adults' => (int) ($attendanceStats->total_adults ?? 0),
+            'children' => (int) ($attendanceStats->total_children ?? 0),
+        ];
+    }
+}
