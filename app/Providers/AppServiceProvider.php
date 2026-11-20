@@ -20,8 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Paksa skema HTTPS saat diakses via Ngrok, proxy HTTPS, atau header forward
+        // Paksa skema HTTPS saat diakses di environment production atau melalui proxy/HTTPS
         if (
+            app()->isProduction() ||
+            str_starts_with((string) config('app.url'), 'https://') ||
             request()->header('x-forwarded-proto') === 'https' ||
             request()->isSecure() ||
             str_contains(request()->header('host', ''), 'ngrok') ||
