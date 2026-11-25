@@ -14,10 +14,12 @@
 ### 1. Manajemen Hak Akses Multi-Peran (RBAC)
 - **Admin**: Akses penuh ke seluruh modul, master data acara, tenant, manajemen pengguna, denah meja, broadcast WhatsApp, dan pengaturan tampilan global.
 - **Tenant / Rekanan**: Akses mandiri untuk mengelola daftar tamu mereka sendiri sesuai alokasi kuota yang telah ditentukan per acara, cetak QR massal, dan export Excel.
-- **Petugas Scanner (`register`)**: Terkunci khusus pada antarmuka tunggal Meja Registrasi (`/scan`) tanpa akses ke panel admin.
+- **Petugas Scanner (`register`)**: Terkunci khusus pada antarmuka tunggal Meja Registrasi (`/scan`) tanpa akses ke panel admin, mendukung **Ploting Petugas per Event** (membatasi akses `/scan` hanya ke acara aktif yang ditugaskan, atau semua acara aktif jika tidak dibatasi).
+- **Ubah Password Mandiri**: Tersedia pada menu dropdown profil untuk Admin/Tenant dan tombol *Ubah Password* di header `/scan` untuk Petugas.
 
 ### 2. Meja Registrasi & Scanner QR Presisi (`/scan`)
 - **Mode Ganda**: Mendukung pemindaian langsung via Kamera HP/Webcam (HTML5 QR Code) dan pemindai Barcode Fisik (USB Scanner) atau pencarian manual Nama/Nomor HP.
+- **Registrasi Tamu Walk-In On-the-Spot (`+ Tamu Walk-In`)**: Pendaftaran tamu baru langsung di meja registrasi (mendukung *Walk-In Umum / Tanpa Pengundang* maupun memilih Tenant dengan validasi kuota), otomatis check-in, dan langsung plot meja dengan validasi sisa kursi. Dilengkapi tombol cepat saat pencarian manual tidak menemukan data tamu.
 - **Ballroom Mode (Dark/Light)**: Tampilan kontras tinggi yang ramah pencahayaan redup ballroom, dilengkapi switch mode instan.
 - **Preferensi Tersimpan**: Sistem otomatis mengingat pilihan kamera/manual dan acara aktif terakhir untuk setiap petugas.
 - **Live Feed & Real-Time Counter**: Menampilkan ringkasan statistik kehadiran (Dewasa & Anak) serta feed 5 tamu terakhir yang melakukan check-in secara real-time.
@@ -32,7 +34,8 @@
 - **Koordinat Persentase Responsif**: Posisi pin meja disimpan dalam persentase (`pos_x%`, `pos_y%`), memastikan posisi meja presisi di semua resolusi dan rasio layar.
 - **Mode Atur Posisi Pin**: Baki meja belum dipetakan, fitur *drag-and-drop* pin, dan tombol reset pin.
 - **Mode Plotting & Monitoring**: Pin berkode warna dinamis (Hijau: sisa > 2, Amber: sisa 1-2, Merah: penuh), slide-over drawer informasi meja, serta form penempatan tamu dengan proteksi pencegah *over-capacity*.
-- **Kontrol Zoom**: Pembesaran denah 100%, 125%, 150% untuk venue padat dengan navigasi geser (*pan*).
+- **Mode Fullscreen & Zoom Dimensi Nyata**: Tombol **Fullscreen Denah** (*Fit-to-Screen* default di desktop dengan *floating toolbar* dan keluar via `ESC`), pilihan zoom `Fit Layar`, `100%`, `125%`, `150%`, `200%`, serta **Mouse Drag-to-Pan**.
+- **Pengalaman Mobile Bergaya Google Maps & Quick Table Switcher**: Viewport touch-scrollable (`min-width: 820px`) dengan pin sentuh `44×44px`, mode `Fit Layar` dengan pin kompak anti-tumpuk (`30×30px`), serta bar **Daftar Cepat Meja** dengan filter zona di bawah denah.
 
 ### 5. Dynamic Branding & Multi-Theme
 - Kustomisasi Nama Aplikasi, Subtitle Login, Logo Resmi, Favicon, serta Warna Utama (*Primary Color*) dan Sekunder (*Secondary Color*) via menu Pengaturan Tampilan.
