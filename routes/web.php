@@ -39,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/scan/search', [ScanController::class, 'search'])->name('scan.search');
         Route::post('/scan/preferences', [ScanController::class, 'updatePreferences'])->name('scan.preferences');
         Route::post('/scan/change-password', [ScanController::class, 'changePassword'])->name('scan.change-password');
+        Route::get('/scan/walk-in-options', [ScanController::class, 'walkInOptions'])->name('scan.walkin.options');
+        Route::post('/scan/walk-in', [ScanController::class, 'walkIn'])->name('scan.walkin');
     });
 
     // Cetak QR Code

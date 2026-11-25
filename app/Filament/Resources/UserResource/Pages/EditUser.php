@@ -23,4 +23,11 @@ class EditUser extends EditRecord
                 ->hidden(fn (): bool => $this->record->id === auth()->id()),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        if ($this->record->role !== 'register') {
+            $this->record->assignedEvents()->detach();
+        }
+    }
 }

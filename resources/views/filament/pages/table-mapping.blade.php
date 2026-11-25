@@ -8,6 +8,7 @@
     $activeTable = $viewData['activeTable'];
     $unassignedGuests = $viewData['unassignedGuests'];
     $tenants = $viewData['tenants'];
+    $zones = $viewData['zones'];
     $settings = $viewData['settings'];
 @endphp
 
@@ -93,6 +94,7 @@
         }
 
         .tm-select {
+            max-width: 100%;
             padding: 0.5rem 2rem 0.5rem 0.75rem;
             font-size: 0.8125rem;
             font-weight: 600;
@@ -113,40 +115,109 @@
             color: #f1f5f9;
         }
 
-        /* Viewport & Canvas */
+        /* Viewport & Real-Dimension Zoom Canvas */
         .tm-viewport {
             position: relative;
             overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x pan-y;
             border-radius: 1rem;
             border: 1px solid #e2e8f0;
             background-color: #0f172a;
-            min-height: 540px;
+            min-height: 420px;
             max-height: 75vh;
             display: flex;
             align-items: flex-start;
             justify-content: flex-start;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
         }
+        @media (min-width: 768px) {
+            .tm-viewport {
+                min-height: 540px;
+            }
+        }
         .dark .tm-viewport {
             border-color: #1e293b;
             background-color: #050811;
         }
+        .tm-viewport.is-pannable {
+            cursor: grab;
+        }
+        .tm-viewport.is-panning {
+            cursor: grabbing !important;
+            user-select: none;
+        }
 
         .tm-zoom-container {
-            display: inline-block;
-            transform-origin: 0 0;
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: block;
+            flex-shrink: 0;
+            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Skala Zoom Berbasis Dimensi Nyata (Bukan CSS transform: scale) */
+        @media (min-width: 768px) {
+            .tm-zoom-container[data-zoom="numeric"] {
+                width: calc(100% * var(--tm-zoom-factor, 1));
+                min-width: calc(100% * var(--tm-zoom-factor, 1));
+            }
+            .tm-zoom-container[data-zoom="fit"] {
+                width: 100%;
+            }
+            .tm-fullscreen-wrapper.is-fullscreen .tm-viewport.is-fit-desktop,
+            .tm-fullscreen-wrapper:fullscreen .tm-viewport.is-fit-desktop {
+                justify-content: center !important;
+                align-items: center !important;
+                overflow: hidden !important;
+            }
+            .tm-fullscreen-wrapper.is-fullscreen .tm-zoom-container[data-zoom="fit"],
+            .tm-fullscreen-wrapper:fullscreen .tm-zoom-container[data-zoom="fit"] {
+                width: auto !important;
+                display: inline-block !important;
+            }
+            .tm-fullscreen-wrapper.is-fullscreen .tm-zoom-container[data-zoom="fit"] .tm-inner-canvas,
+            .tm-fullscreen-wrapper:fullscreen .tm-zoom-container[data-zoom="fit"] .tm-inner-canvas {
+                width: auto !important;
+                display: inline-block !important;
+            }
+            .tm-fullscreen-wrapper.is-fullscreen .tm-zoom-container[data-zoom="fit"] .tm-floorplan-img,
+            .tm-fullscreen-wrapper:fullscreen .tm-zoom-container[data-zoom="fit"] .tm-floorplan-img {
+                width: auto !important;
+                height: auto !important;
+                max-height: calc(100vh - 110px) !important;
+                max-width: 100% !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .tm-zoom-container[data-zoom="numeric"] {
+                width: calc(820px * var(--tm-zoom-factor, 1));
+                min-width: calc(820px * var(--tm-zoom-factor, 1));
+            }
+            .tm-zoom-container[data-zoom="fit"] {
+                width: 100%;
+                min-width: 0;
+            }
         }
 
         .tm-inner-canvas {
             position: relative;
             display: inline-block;
+            width: 100%;
             line-height: 0;
             user-select: none;
             cursor: default;
         }
         .tm-inner-canvas.is-placing {
             cursor: crosshair !important;
+        }
+        .tm-floorplan-img {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: none;
+            pointer-events: none;
+            user-select: none;
         }
 
         /* Table Pins */
@@ -155,6 +226,7 @@
             transform: translate(-50%, -50%);
             width: 44px;
             height: 44px;
+            min-width: 44px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
@@ -166,8 +238,21 @@
             line-height: 1;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), 0 0 0 2.5px #ffffff;
             cursor: pointer;
+            touch-action: manipulation;
             transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
             z-index: 10;
+        }
+        @media (max-width: 767px) {
+            .tm-pin.tm-pin-compact {
+                width: 30px;
+                min-width: 30px;
+                height: 30px;
+                font-size: 11px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), 0 0 0 2px #ffffff;
+            }
+            .tm-pin.tm-pin-compact .tm-pin-capacity {
+                display: none;
+            }
         }
         .dark .tm-pin {
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 0 2.5px #0f172a;
@@ -296,7 +381,7 @@
             inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
-            z-index: 1000;
+            z-index: 10050;
             display: flex;
             justify-content: flex-end;
             transition: opacity 0.25s ease;
@@ -320,17 +405,257 @@
             from { transform: translateX(100%); }
             to { transform: translateX(0); }
         }
+
+        /* Fullscreen Mode & Floating Toolbar */
+        .tm-fullscreen-wrapper {
+            position: relative;
+        }
+        .tm-fullscreen-wrapper.is-fullscreen,
+        .tm-fullscreen-wrapper:fullscreen {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 9999 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: #0b0f19 !important;
+            padding: 0.75rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+            overflow: hidden !important;
+        }
+        .tm-fullscreen-wrapper.is-fullscreen .tm-canvas-card,
+        .tm-fullscreen-wrapper:fullscreen .tm-canvas-card {
+            flex: 1 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 0 !important;
+            border-radius: 0.75rem !important;
+        }
+        .tm-fullscreen-wrapper.is-fullscreen .tm-viewport,
+        .tm-fullscreen-wrapper:fullscreen .tm-viewport {
+            flex: 1 1 auto !important;
+            max-height: none !important;
+            height: 100% !important;
+            border-radius: 0.75rem !important;
+        }
+        .tm-fullscreen-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.625rem 1rem;
+            border-radius: 0.875rem;
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            color: #f8fafc;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+            flex-shrink: 0;
+        }
+        .tm-fs-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: #ffffff;
+            font-size: 0.8125rem;
+            font-weight: 700;
+        }
+        .tm-fs-select {
+            padding: 0.375rem 1.75rem 0.375rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background-color: #1e293b;
+            color: #f1f5f9;
+            outline: none;
+        }
+        .tm-fs-exit-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.4375rem 0.875rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            background-color: #dc2626;
+            color: #ffffff;
+            border: 1px solid #ef4444;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        .tm-fs-exit-btn:hover {
+            background-color: #b91c1c;
+        }
+
+        /* Quick Table Switcher Bar (Daftar Cepat Meja) */
+        .tm-quick-switcher {
+            padding: 0.875rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.625rem;
+        }
+        .tm-qs-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .tm-qs-zones {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .tm-zone-pill {
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .dark .tm-zone-pill {
+            background-color: #0f172a;
+            border-color: #334155;
+            color: #cbd5e1;
+        }
+        .tm-zone-pill.is-active {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            border-color: transparent;
+            color: #ffffff;
+        }
+        .tm-pills-scroll {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.25rem;
+        }
+        .tm-table-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            background-color: #ffffff;
+            color: #1e293b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.15s ease;
+        }
+        .dark .tm-table-pill {
+            background-color: #0f172a;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+        .tm-table-pill:hover,
+        .tm-table-pill.is-active {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 2px rgba(47, 118, 181, 0.2);
+        }
+        .tm-status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 9999px;
+            flex-shrink: 0;
+        }
     </style>
 
     <div x-data="{
         mode: @entangle('mode'),
         zoomLevel: @entangle('zoomLevel'),
         selectedTableForPosition: @entangle('selectedTableForPosition'),
+        isFullscreen: false,
+        quickZoneFilter: 'all',
         dragTargetId: null,
         startX: 0,
         startY: 0,
         isDragging: false,
         hasMovedPastThreshold: false,
+        isPanPending: false,
+        isPanning: false,
+        justPanned: false,
+        panStartX: 0,
+        panStartY: 0,
+        panStartScrollLeft: 0,
+        panStartScrollTop: 0,
+
+        init() {
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement && this.isFullscreen) {
+                    this.isFullscreen = false;
+                    if (this.zoomLevel === 'fit') {
+                        $wire.setZoom('100');
+                    }
+                }
+            });
+        },
+
+        async toggleFullscreen() {
+            if (this.isFullscreen) {
+                await this.exitFullscreen();
+                return;
+            }
+            this.isFullscreen = true;
+            $wire.setZoom('fit');
+            const el = this.$refs.fullscreenContainer;
+            if (el && el.requestFullscreen) {
+                try {
+                    await el.requestFullscreen();
+                } catch (e) {
+                    // Fallback CSS fixed overlay tetap aktif saat native Fullscreen API ditolak
+                }
+            }
+        },
+
+        async exitFullscreen() {
+            this.isFullscreen = false;
+            if (this.zoomLevel === 'fit') {
+                $wire.setZoom('100');
+            }
+            if (document.fullscreenElement && document.exitFullscreen) {
+                try {
+                    await document.exitFullscreen();
+                } catch (e) {
+                    // Abaikan jika sudah keluar dari native fullscreen
+                }
+            }
+        },
+
+        getZoomFactor() {
+            if (this.zoomLevel === 'fit') return 1;
+            const parsed = parseInt(this.zoomLevel, 10);
+            return Number.isNaN(parsed) ? 1 : (parsed / 100);
+        },
+
+        startPan(event) {
+            if (event.button !== 0) return;
+            if (this.dragTargetId) return;
+            const viewport = this.$refs.viewport;
+            if (!viewport) return;
+            this.isPanPending = true;
+            this.isPanning = false;
+            this.panStartX = event.clientX;
+            this.panStartY = event.clientY;
+            this.panStartScrollLeft = viewport.scrollLeft;
+            this.panStartScrollTop = viewport.scrollTop;
+        },
 
         startDrag(tableId, event) {
             if (this.mode !== 'position') return;
@@ -342,13 +667,28 @@
         },
 
         onWindowMouseMove(event) {
-            if (!this.dragTargetId) return;
-            const clientX = event.clientX || (event.touches ? event.touches[0].clientX : 0);
-            const clientY = event.clientY || (event.touches ? event.touches[0].clientY : 0);
-            const distance = Math.hypot(clientX - this.startX, clientY - this.startY);
-            if (distance > 4) {
-                this.hasMovedPastThreshold = true;
-                this.isDragging = true;
+            if (this.dragTargetId) {
+                const clientX = event.clientX || (event.touches ? event.touches[0].clientX : 0);
+                const clientY = event.clientY || (event.touches ? event.touches[0].clientY : 0);
+                const distance = Math.hypot(clientX - this.startX, clientY - this.startY);
+                if (distance > 4) {
+                    this.hasMovedPastThreshold = true;
+                    this.isDragging = true;
+                }
+                return;
+            }
+
+            if (this.isPanPending) {
+                const dx = event.clientX - this.panStartX;
+                const dy = event.clientY - this.panStartY;
+                if (Math.hypot(dx, dy) > 4) {
+                    this.isPanning = true;
+                    const viewport = this.$refs.viewport;
+                    if (viewport) {
+                        viewport.scrollLeft = this.panStartScrollLeft - dx;
+                        viewport.scrollTop = this.panStartScrollTop - dy;
+                    }
+                }
             }
         },
 
@@ -367,6 +707,15 @@
                 }
             }
 
+            if (this.isPanning) {
+                this.justPanned = true;
+                setTimeout(() => {
+                    this.justPanned = false;
+                }, 60);
+            }
+
+            this.isPanPending = false;
+            this.isPanning = false;
             this.dragTargetId = null;
             setTimeout(() => {
                 this.isDragging = false;
@@ -375,7 +724,7 @@
         },
 
         handlePinClick(tableId) {
-            if (this.isDragging || this.hasMovedPastThreshold) return;
+            if (this.isDragging || this.hasMovedPastThreshold || this.justPanned) return;
 
             if (this.mode === 'plotting') {
                 $wire.openTableDrawer(tableId);
@@ -387,7 +736,7 @@
 
         // Detail 2: Presisi Klik Saat Zoom dihitung langsung dari inner canvas wrapper ($refs.canvas)
         handleCanvasClick(event) {
-            if (this.isDragging || this.hasMovedPastThreshold) return;
+            if (this.isDragging || this.hasMovedPastThreshold || this.justPanned) return;
             if (this.mode !== 'position') return;
             if (!this.selectedTableForPosition) return;
 
@@ -400,19 +749,43 @@
                 const posY = parseFloat(((clickY / rect.height) * 100).toFixed(2));
                 $wire.saveTablePosition(this.selectedTableForPosition, posX, posY);
             }
+        },
+
+        scrollToPin(posX, posY) {
+            const viewport = this.$refs.viewport;
+            const canvas = this.$refs.canvas;
+            if (!viewport || !canvas) return;
+            const targetX = (canvas.offsetWidth * (posX / 100)) - (viewport.clientWidth / 2);
+            const targetY = (canvas.offsetHeight * (posY / 100)) - (viewport.clientHeight / 2);
+            viewport.scrollTo({
+                left: Math.max(0, targetX),
+                top: Math.max(0, targetY),
+                behavior: 'smooth',
+            });
+        },
+
+        handleQuickTableClick(tableId, posX, posY) {
+            this.scrollToPin(posX, posY);
+            if (this.mode === 'plotting') {
+                $wire.openTableDrawer(tableId);
+            } else {
+                this.selectedTableForPosition = tableId;
+                $wire.selectTableForPosition(tableId);
+            }
         }
     }"
     @mousemove.window="onWindowMouseMove($event)"
     @mouseup.window="onWindowMouseUp($event)"
     @touchmove.window="onWindowMouseMove($event)"
     @touchend.window="onWindowMouseUp($event)"
+    @keydown.escape.window="if (isFullscreen) exitFullscreen()"
     class="space-y-4">
 
         {{-- TOP CONTROL TOOLBAR --}}
         <div class="tm-card tm-toolbar">
             <div class="flex items-center flex-wrap gap-2.5">
                 {{-- Event Selector --}}
-                <div class="flex items-center gap-2">
+                <div class="flex items-center flex-wrap gap-2 max-w-full">
                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Acara:</span>
                     <select wire:model.live="selectedEventId" class="tm-select">
                         @forelse($activeEvents as $event)
@@ -424,7 +797,7 @@
                 </div>
 
                 {{-- Mode Switcher --}}
-                <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800">
+                <div class="inline-flex flex-wrap rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 max-w-full">
                     <button type="button"
                             wire:click="setMode('plotting')"
                             class="tm-btn !border-0 {{ $mode === 'plotting' ? 'tm-btn-primary' : '' }}"
@@ -466,11 +839,24 @@
                 @endif
 
                 {{-- Zoom Controls --}}
-                <div class="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 text-xs">
-                    <button type="button" wire:click="setZoom(100)" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === 100 ? 'tm-btn-active' : '' }}">100%</button>
-                    <button type="button" wire:click="setZoom(125)" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === 125 ? 'tm-btn-active' : '' }}">125%</button>
-                    <button type="button" wire:click="setZoom(150)" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === 150 ? 'tm-btn-active' : '' }}">150%</button>
+                <div class="inline-flex flex-wrap items-center rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 text-xs">
+                    <button type="button" wire:click="setZoom('fit')" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === 'fit' ? 'tm-btn-active' : '' }}" title="Sesuaikan Seluruh Denah ke Layar">Fit Layar</button>
+                    <button type="button" wire:click="setZoom('100')" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === '100' ? 'tm-btn-active' : '' }}">100%</button>
+                    <button type="button" wire:click="setZoom('125')" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === '125' ? 'tm-btn-active' : '' }}">125%</button>
+                    <button type="button" wire:click="setZoom('150')" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === '150' ? 'tm-btn-active' : '' }}">150%</button>
+                    <button type="button" wire:click="setZoom('200')" class="tm-btn !border-0 !py-1 !px-2.5 {{ $zoomLevel === '200' ? 'tm-btn-active' : '' }}">200%</button>
                 </div>
+
+                {{-- Tombol Fullscreen Denah --}}
+                <button type="button"
+                        @click="toggleFullscreen()"
+                        class="tm-btn tm-btn-primary !py-1.5 !px-3 text-xs"
+                        title="Tampilkan Denah Layar Penuh">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                    <span>Fullscreen Denah</span>
+                </button>
 
                 {{-- Indikator Statistik --}}
                 <div class="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
@@ -503,8 +889,58 @@
             </div>
         @endif
 
-        {{-- CANVAS VIEWPORT AREA --}}
-        <div class="tm-card overflow-hidden">
+        {{-- FULLSCREEN CONTAINER (CANVAS + FLOATING TOOLBAR + DRAWER) --}}
+        <div x-ref="fullscreenContainer"
+             class="tm-fullscreen-wrapper"
+             :class="{ 'is-fullscreen': isFullscreen }">
+
+            {{-- Floating Toolbar saat Fullscreen Aktif --}}
+            <div x-show="isFullscreen" x-cloak class="tm-fullscreen-toolbar">
+                <div class="flex items-center flex-wrap gap-2.5">
+                    <span class="tm-fs-badge">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                        <span>{{ $currentEvent->name ?? 'Denah Acara' }}</span>
+                    </span>
+
+                    <select wire:model.live="statusFilter" class="tm-fs-select">
+                        <option value="all">Semua Meja</option>
+                        <option value="available">Tersedia Kursi (>0)</option>
+                        <option value="full">Meja Penuh (0)</option>
+                    </select>
+
+                    @if($tenants->count() > 0)
+                        <select wire:model.live="tenantFilter" class="tm-fs-select">
+                            <option value="all">Semua Tenant</option>
+                            @foreach($tenants as $tenant)
+                                <option value="{{ $tenant->id }}">{{ $tenant->name }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+
+                <div class="flex items-center flex-wrap gap-2">
+                    <div class="inline-flex flex-wrap items-center rounded-lg bg-slate-800 p-0.5 border border-slate-700 text-xs">
+                        <button type="button" wire:click="setZoom('fit')" class="tm-btn !border-0 !py-1 !px-2 text-xs {{ $zoomLevel === 'fit' ? 'tm-btn-primary' : '!bg-transparent !text-slate-300' }}">Fit</button>
+                        <button type="button" wire:click="setZoom('100')" class="tm-btn !border-0 !py-1 !px-2 text-xs {{ $zoomLevel === '100' ? 'tm-btn-primary' : '!bg-transparent !text-slate-300' }}">100%</button>
+                        <button type="button" wire:click="setZoom('125')" class="tm-btn !border-0 !py-1 !px-2 text-xs {{ $zoomLevel === '125' ? 'tm-btn-primary' : '!bg-transparent !text-slate-300' }}">125%</button>
+                        <button type="button" wire:click="setZoom('150')" class="tm-btn !border-0 !py-1 !px-2 text-xs {{ $zoomLevel === '150' ? 'tm-btn-primary' : '!bg-transparent !text-slate-300' }}">150%</button>
+                        <button type="button" wire:click="setZoom('200')" class="tm-btn !border-0 !py-1 !px-2 text-xs {{ $zoomLevel === '200' ? 'tm-btn-primary' : '!bg-transparent !text-slate-300' }}">200%</button>
+                        <button type="button" wire:click="setZoom('fit')" class="tm-btn !border-0 !py-1 !px-2 text-xs !bg-transparent !text-slate-300 hover:!text-white">Reset</button>
+                    </div>
+
+                    <button type="button" @click="exitFullscreen()" class="tm-fs-exit-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                        </svg>
+                        <span>Keluar Fullscreen (ESC)</span>
+                    </button>
+                </div>
+            </div>
+
+            {{-- CANVAS VIEWPORT AREA --}}
+            <div class="tm-card tm-canvas-card overflow-hidden">
             @if(! $currentEvent || ! $currentEvent->getFloorPlanUrl())
                 {{-- Empty State: Denah Belum Diunggah --}}
                 <div class="p-12 text-center flex flex-col items-center justify-center min-h-[440px] space-y-4">
@@ -530,9 +966,18 @@
                     @endif
                 </div>
             @else
-                {{-- Viewport dengan Kontrol Zoom --}}
-                <div class="tm-viewport">
-                    <div class="tm-zoom-container" :style="'transform: scale(' + (zoomLevel / 100) + ');'">
+                {{-- Viewport dengan Kontrol Zoom Dimensi Nyata & Mouse Drag-to-Pan --}}
+                <div class="tm-viewport"
+                     x-ref="viewport"
+                     :class="{
+                         'is-fit-desktop': isFullscreen && zoomLevel === 'fit',
+                         'is-pannable': !isPanning && (zoomLevel !== 'fit' || !isFullscreen),
+                         'is-panning': isPanning
+                     }"
+                     @mousedown="startPan($event)">
+                    <div class="tm-zoom-container"
+                         data-zoom="{{ $zoomLevel === 'fit' ? 'fit' : 'numeric' }}"
+                         :style="'--tm-zoom-factor: ' + getZoomFactor() + ';'">
                         {{-- Detail 2: Inner Canvas Wrapper tempat @click listener dipasang --}}
                         <div class="tm-inner-canvas"
                              :class="{ 'is-placing': mode === 'position' && selectedTableForPosition }"
@@ -541,7 +986,7 @@
                             {{-- Gambar Denah Ruangan --}}
                             <img src="{{ $currentEvent->getFloorPlanUrl() }}"
                                  alt="Denah {{ $currentEvent->name }}"
-                                 class="block max-w-full h-auto pointer-events-none select-none" />
+                                 class="tm-floorplan-img" />
 
                             {{-- Render Pin Meja Terpetakan --}}
                             @foreach($mappedTables as $table)
@@ -575,11 +1020,11 @@
 
                                 {{-- Detail 3: wire:key pada pin, @click.stop, drag threshold > 4px --}}
                                 <div wire:key="pin-{{ $table->id }}"
-                                     class="tm-pin {{ $isDimmed ? 'is-dimmed' : '' }} {{ $isHighlightedByTenant ? 'is-highlighted' : '' }}"
+                                     class="tm-pin {{ $zoomLevel === 'fit' ? 'tm-pin-compact' : '' }} {{ $isDimmed ? 'is-dimmed' : '' }} {{ $isHighlightedByTenant ? 'is-highlighted' : '' }}"
                                      :class="{ 'is-selected': selectedTableForPosition == {{ $table->id }} || {{ $activeTableId == $table->id ? 'true' : 'false' }} }"
                                      style="left: {{ $table->pos_x }}%; top: {{ $table->pos_y }}%; background-color: {{ $statusColor }};"
-                                     @mousedown="startDrag({{ $table->id }}, $event)"
-                                     @touchstart="startDrag({{ $table->id }}, $event)"
+                                     @mousedown.stop="startDrag({{ $table->id }}, $event)"
+                                     @touchstart.stop="startDrag({{ $table->id }}, $event)"
                                      @click.stop="handlePinClick({{ $table->id }})">
                                     
                                     {{-- Nomor / Label Meja --}}
@@ -648,6 +1093,55 @@
             @endif
         </div>
 
+        {{-- QUICK TABLE SWITCHER BAR (DAFTAR CEPAT MEJA) --}}
+        @if($mappedTables->count() > 0)
+            <div x-show="!isFullscreen" class="tm-card tm-quick-switcher">
+                <div class="tm-qs-header">
+                    <span class="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+                        Daftar Cepat Meja ({{ $mappedTables->count() }})
+                    </span>
+
+                    <div class="tm-qs-zones">
+                        <button type="button"
+                                @click="quickZoneFilter = 'all'"
+                                class="tm-zone-pill"
+                                :class="{ 'is-active': quickZoneFilter === 'all' }">
+                            Semua Zona
+                        </button>
+                        @foreach($zones as $zoneName)
+                            <button type="button"
+                                    @click="quickZoneFilter = '{{ addslashes($zoneName) }}'"
+                                    class="tm-zone-pill"
+                                    :class="{ 'is-active': quickZoneFilter === '{{ addslashes($zoneName) }}' }">
+                                {{ $zoneName }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="tm-pills-scroll">
+                    @foreach($mappedTables as $qt)
+                        @php
+                            $qtOccupied = $qt->getOccupiedSeats();
+                            $qtColor = $qt->getStatusColor();
+                            $qtZone = $qt->zone ?? '';
+                        @endphp
+                        <button type="button"
+                                wire:key="quick-pill-{{ $qt->id }}"
+                                x-show="quickZoneFilter === 'all' || quickZoneFilter === '{{ addslashes($qtZone) }}'"
+                                @click="handleQuickTableClick({{ $qt->id }}, {{ $qt->pos_x }}, {{ $qt->pos_y }})"
+                                class="tm-table-pill {{ $activeTableId == $qt->id ? 'is-active' : '' }}">
+                            <span class="tm-status-dot" style="background-color: {{ $qtColor }};"></span>
+                            <span>{{ $qt->name }}</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                                {{ $qtOccupied }}/{{ $qt->capacity }}
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         {{-- SLIDE-OVER DRAWER (MODE PLOTTING & MONITORING) --}}
         @if($activeTable)
             @php
@@ -715,7 +1209,7 @@
                                             if ($guestPax <= 0) $guestPax = 1;
                                         @endphp
                                         <option value="{{ $ug->id }}">
-                                            {{ $ug->name }} ({{ $guestPax }} pax) - {{ $ug->tenant->name ?? 'No Tenant' }}
+                                            {{ $ug->name }} ({{ $guestPax }} pax) - {{ $ug->tenant?->name ?? 'Tanpa Pengundang' }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -755,7 +1249,7 @@
                                                 </span>
                                             </div>
                                             <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
-                                                <span>{{ $tableGuest->tenant->name ?? '-' }}</span>
+                                                <span>{{ $tableGuest->tenant?->name ?? 'Tanpa Pengundang' }}</span>
                                                 <span>•</span>
                                                 @if($tableGuest->is_attended)
                                                     <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Hadir</span>
@@ -784,5 +1278,6 @@
                 </div>
             </div>
         @endif
+        </div>
     </div>
 </x-filament-panels::page>

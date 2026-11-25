@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
@@ -24,6 +25,11 @@ class Event extends Model
     public function tables(): HasMany
     {
         return $this->hasMany(Table::class);
+    }
+
+    public function assignedOfficers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'event_user')->withTimestamps();
     }
 
     public function getFloorPlanUrl(): ?string

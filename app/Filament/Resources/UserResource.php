@@ -17,6 +17,7 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -87,6 +88,15 @@ class UserResource extends Resource
                         ->visible(fn (Forms\Get $get) => $get('role') === 'tenant')
                         ->required(fn (Forms\Get $get) => $get('role') === 'tenant'),
 
+                    Select::make('assignedEvents')
+                        ->label('Penugasan Acara (Ploting Event)')
+                        ->relationship('assignedEvents', 'name')
+                        ->multiple()
+                        ->preload()
+                        ->searchable()
+                        ->helperText('Kosongkan agar petugas dapat melayani semua acara yang aktif.')
+                        ->visible(fn (Forms\Get $get) => $get('role') === 'register'),
+
                     Toggle::make('is_active')
                         ->label('Status Aktif')
                         ->default(true)
@@ -99,6 +109,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['tenant', 'assignedEvents']))
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama Lengkap')
@@ -132,6 +143,22 @@ class UserResource extends Resource
                     ->placeholder('-')
                     ->sortable()
                     ->searchable(),
+
+                TextColumn::make('assignedEvents.name')
+                    ->label('Ploting Acara')
+                    ->badge()
+                    ->color(fn (User $record): string => $record->role === 'register' && $record->assignedEvents->isEmpty() ? 'gray' : 'primary')
+                    ->getStateUsing(function (User $record): array|string {
+                        if ($record->role !== 'register') {
+                            return '-';
+                        }
+
+                        if ($record->assignedEvents->isEmpty()) {
+                            return 'Semua Acara Aktif';
+                        }
+
+                        return $record->assignedEvents->pluck('name')->all();
+                    }),
 
                 ToggleColumn::make('is_active')
                     ->label('Status Aktif')

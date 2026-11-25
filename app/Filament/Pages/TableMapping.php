@@ -35,7 +35,7 @@ class TableMapping extends Page
 
     public string $tenantFilter = 'all'; // 'all' | (string) tenant_id
 
-    public int $zoomLevel = 100; // 100, 125, 150
+    public string $zoomLevel = '100'; // 'fit', '100', '125', '150', '200'
 
     public ?int $activeTableId = null; // ID meja yang sedang dibuka di Slide-Over Drawer
 
@@ -79,9 +79,9 @@ class TableMapping extends Page
         }
     }
 
-    public function setZoom(int $level): void
+    public function setZoom(string $level): void
     {
-        if (in_array($level, [100, 125, 150], true)) {
+        if (in_array($level, ['fit', '100', '125', '150', '200'], true)) {
             $this->zoomLevel = $level;
         }
     }
@@ -268,6 +268,13 @@ class TableMapping extends Page
             ? $currentEvent->tenants()->orderBy('name')->get()
             : collect();
 
+        $zones = $mappedTables
+            ->pluck('zone')
+            ->filter(fn ($z) => filled($z))
+            ->unique()
+            ->sort()
+            ->values();
+
         $settings = Setting::get();
 
         return [
@@ -279,6 +286,7 @@ class TableMapping extends Page
             'activeTable' => $activeTable,
             'unassignedGuests' => $unassignedGuests,
             'tenants' => $tenants,
+            'zones' => $zones,
             'settings' => $settings,
         ];
     }

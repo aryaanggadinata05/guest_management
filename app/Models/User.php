@@ -5,8 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -58,5 +60,32 @@ class User extends Authenticatable implements FilamentUser
     public function attendancesScanned(): HasMany
     {
         return $this->hasMany(Attendance::class, 'user_id');
+    }
+
+    public function assignedEvents(): BelongsToMany
+    {
+        return $this->belongsToMany(Event::class, 'event_user')->withTimestamps();
+    }
+
+    /**
+     * Mengambil daftar acara aktif yang dapat diakses oleh user pada halaman /scan.
+     *
+     * @return EloquentCollection<int, Event>
+     */
+    public function getAccessibleEvents(): EloquentCollection
+    {
+        if ($this->role === 'admin') {
+            return Event::where('is_active', true)->get();
+        }
+
+        if ($this->role === 'register') {
+            if ($this->assignedEvents()->exists()) {
+                return $this->assignedEvents()->where('is_active', true)->get();
+            }
+
+            return Event::where('is_active', true)->get();
+        }
+
+        return new EloquentCollection;
     }
 }

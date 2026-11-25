@@ -118,6 +118,96 @@
         html.dark .input-surface:focus {
             border-color: var(--brand-primary) !important;
         }
+
+        /* Walk-In Button, Modal & Toast (Self-contained CSS) */
+        .walkin-trigger-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            padding: 0.55rem 0.95rem;
+            border-radius: 0.75rem;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+            transition: transform 0.15s ease, opacity 0.15s ease;
+            white-space: nowrap;
+        }
+        .walkin-trigger-btn:hover {
+            opacity: 0.94;
+            transform: translateY(-1px);
+        }
+
+        .walkin-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(5px);
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .walkin-modal-overlay.is-hidden {
+            display: none !important;
+        }
+        .walkin-modal-card {
+            width: 100%;
+            max-width: 520px;
+            max-height: 92vh;
+            overflow-y: auto;
+            background-color: #ffffff;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.35rem;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28);
+        }
+        html.dark .walkin-modal-card {
+            background-color: #151e2e;
+            color: #f8fafc;
+            border-color: #263346;
+        }
+        .walkin-alert {
+            padding: 0.75rem 0.9rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.85rem;
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        html.dark .walkin-alert {
+            background-color: rgba(127, 29, 29, 0.45);
+            color: #fecaca;
+            border-color: #991b1b;
+        }
+        .walkin-toast {
+            position: fixed;
+            bottom: 1.25rem;
+            right: 1.25rem;
+            z-index: 80;
+            padding: 0.8rem 1.15rem;
+            border-radius: 0.875rem;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: #ffffff;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: 90vw;
+        }
+        .walkin-toast.is-visible {
+            display: flex;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen p-3 sm:p-5 md:p-6 transition-colors duration-200">
@@ -135,11 +225,11 @@
                     </div>
                 @endif
                 <div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
                         <h1 class="text-base sm:text-lg font-black text-heading text-slate-900 tracking-tight leading-tight">
                             {{ $settings->app_name ?? 'Guest Management' }}
                         </h1>
-                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
                             Meja Registrasi
                         </span>
                     </div>
@@ -261,30 +351,39 @@
             
             <div class="card-surface bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
                 
-                {{-- SEGMENTED TOGGLE CONTROL --}}
-                <div class="bg-slate-100 dark:bg-slate-900/90 p-1 rounded-xl flex items-center border border-slate-200 dark:border-slate-800">
-                    <button 
-                        type="button" 
-                        id="tab-btn-camera" 
-                        onclick="switchScanMode('camera')"
-                        class="flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition duration-150"
-                    >
+                {{-- SEGMENTED TOGGLE CONTROL + WALK-IN BUTTON --}}
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+                    <div class="flex-1 bg-slate-100 dark:bg-slate-900/90 p-1 rounded-xl flex items-center border border-slate-200 dark:border-slate-800">
+                        <button 
+                            type="button" 
+                            id="tab-btn-camera" 
+                            onclick="switchScanMode('camera')"
+                            class="flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition duration-150"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Kamera Scanner</span>
+                        </button>
+                        <button 
+                            type="button" 
+                            id="tab-btn-manual" 
+                            onclick="switchScanMode('manual')"
+                            class="flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition duration-150"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                            </svg>
+                            <span>Scanner Fisik / Cari Manual</span>
+                        </button>
+                    </div>
+
+                    <button type="button" id="btn-open-walkin" onclick="openWalkInModal()" class="walkin-trigger-btn">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                         </svg>
-                        <span>Kamera Scanner</span>
-                    </button>
-                    <button 
-                        type="button" 
-                        id="tab-btn-manual" 
-                        onclick="switchScanMode('manual')"
-                        class="flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition duration-150"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                        </svg>
-                        <span>Scanner Fisik / Cari Manual</span>
+                        <span>+ Tamu Walk-In</span>
                     </button>
                 </div>
 
@@ -435,6 +534,79 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    {{-- MODAL REGISTRASI TAMU WALK-IN ON-THE-SPOT --}}
+    <div id="walkInModal" class="walkin-modal-overlay is-hidden">
+        <div class="walkin-modal-card">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                <div>
+                    <h3 class="text-base sm:text-lg font-black text-heading leading-tight">Registrasi Tamu Walk-In</h3>
+                    <p id="wi-event-label" class="text-xs text-muted text-slate-500">Daftarkan tamu baru, check-in otomatis & plot meja</p>
+                </div>
+                <button type="button" onclick="closeWalkInModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-2xl leading-none">&times;</button>
+            </div>
+
+            <div id="wi-modal-alert" class="walkin-alert hidden"></div>
+
+            <form id="walkin-form" onsubmit="submitWalkIn(event)" class="space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="wi-name" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Tamu <span class="text-red-500">*</span></label>
+                        <input type="text" id="wi-name" required placeholder="Nama lengkap tamu..." class="input-surface w-full border rounded-xl p-2.5 text-xs font-semibold focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="wi-phone" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nomor HP / WA (Opsional)</label>
+                        <input type="text" id="wi-phone" placeholder="0812xxxx..." class="input-surface w-full border rounded-xl p-2.5 text-xs font-semibold focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="wi-tenant-id" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Kategori / Pengundang</label>
+                    <select id="wi-tenant-id" class="input-surface w-full border rounded-xl p-2.5 text-xs font-semibold focus:outline-none">
+                        <option value="">Tanpa Pengundang (Walk-In Umum)</option>
+                    </select>
+                </div>
+
+                <div class="card-subsurface p-3.5 bg-slate-50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+                    <span class="text-xs font-black text-heading block uppercase tracking-wider">Jumlah Hadir & Plot Meja</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="wi-adult-count" class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Dewasa</label>
+                            <input type="number" id="wi-adult-count" min="1" max="50" value="1" required class="input-surface w-full border rounded-xl p-2 text-xs font-black">
+                        </div>
+                        <div>
+                            <label for="wi-child-count" class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Anak</label>
+                            <input type="number" id="wi-child-count" min="0" max="50" value="0" required class="input-surface w-full border rounded-xl p-2 text-xs font-black">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="wi-table-id" class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Plot Nomor Meja</label>
+                        <select id="wi-table-id" class="input-surface w-full border rounded-xl p-2.5 text-xs font-semibold focus:outline-none">
+                            <option value="">Tanpa Meja</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" id="wi-submit-btn" class="walkin-trigger-btn flex-1 !py-2.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Daftarkan &amp; Check-In</span>
+                    </button>
+                    <button type="button" onclick="closeWalkInModal()" class="w-1/3 py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="walkin-toast" class="walkin-toast">
+        <span>✓</span>
+        <span id="walkin-toast-text"></span>
     </div>
 
     {{-- MODAL KONFIRMASI & UPDATE DATA TAMU (POPUP) --}}
@@ -624,54 +796,57 @@
         }
 
         // 5. Muat Statistik Terkini & Live Feed 5 Tamu Terakhir
+        function applyStatsPayload(d) {
+            if (!d) return;
+            document.getElementById('stat-total').innerText = d.total || 0;
+            document.getElementById('stat-attended').innerText = d.attended || 0;
+            document.getElementById('stat-unattended').innerText = d.unattended || 0;
+            document.getElementById('stat-adults').innerText = d.adults || 0;
+            document.getElementById('stat-children').innerText = d.children || 0;
+
+            // Render Feed 5 Tamu Terakhir
+            const feedList = document.getElementById('recent-feed-list');
+            if (!d.recent || d.recent.length === 0) {
+                feedList.innerHTML = `
+                    <div class="text-center py-4 text-xs text-muted text-slate-400">
+                        Belum ada tamu yang check-in pada sesi acara ini.
+                    </div>
+                `;
+            } else {
+                feedList.innerHTML = d.recent.map(item => `
+                    <div class="p-2.5 rounded-xl card-subsurface bg-slate-50 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-3 text-xs">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shrink-0 text-xs shadow-sm" style="background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));">
+                                ${item.guest_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-bold text-heading text-slate-800 dark:text-white truncate">${item.guest_name}</p>
+                                <p class="text-[11px] text-muted text-slate-400 truncate">Pengundang: ${item.tenant_name || 'Tanpa Pengundang'}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50">
+                                ${item.table_name}
+                            </span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50">
+                                ${item.adult_count} Dewasa${item.child_count > 0 ? ', ' + item.child_count + ' Anak' : ''}
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-medium hidden sm:inline">
+                                ${item.scanned_time}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
         function loadStats() {
             const eventId = getActiveEventId();
             if (!eventId) return;
 
             fetch(`/scan/stats?event_id=${eventId}`)
                 .then(r => r.json())
-                .then(d => {
-                    document.getElementById('stat-total').innerText = d.total || 0;
-                    document.getElementById('stat-attended').innerText = d.attended || 0;
-                    document.getElementById('stat-unattended').innerText = d.unattended || 0;
-                    document.getElementById('stat-adults').innerText = d.adults || 0;
-                    document.getElementById('stat-children').innerText = d.children || 0;
-
-                    // Render Feed 5 Tamu Terakhir
-                    const feedList = document.getElementById('recent-feed-list');
-                    if (!d.recent || d.recent.length === 0) {
-                        feedList.innerHTML = `
-                            <div class="text-center py-4 text-xs text-muted text-slate-400">
-                                Belum ada tamu yang check-in pada sesi acara ini.
-                            </div>
-                        `;
-                    } else {
-                        feedList.innerHTML = d.recent.map(item => `
-                            <div class="p-2.5 rounded-xl card-subsurface bg-slate-50 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-3 text-xs">
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shrink-0 text-xs shadow-sm" style="background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));">
-                                        ${item.guest_name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="font-bold text-heading text-slate-800 dark:text-white truncate">${item.guest_name}</p>
-                                        <p class="text-[11px] text-muted text-slate-400 truncate">Pengundang: ${item.tenant_name}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50">
-                                        ${item.table_name}
-                                    </span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50">
-                                        ${item.adult_count} Dewasa${item.child_count > 0 ? ', ' + item.child_count + ' Anak' : ''}
-                                    </span>
-                                    <span class="text-[10px] text-slate-400 font-medium hidden sm:inline">
-                                        ${item.scanned_time}
-                                    </span>
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-                })
+                .then(d => applyStatsPayload(d))
                 .catch(err => console.warn('Gagal memuat statistik:', err));
         }
 
@@ -754,7 +929,7 @@
             document.getElementById('modal-phone').value = guest.phone || '';
             document.getElementById('modal-gender').value = guest.gender || '';
             document.getElementById('modal-job-type').value = guest.job_type || '';
-            document.getElementById('modal-tenant-name').innerText = `Tenant Pengundang: ${guest.tenant ? guest.tenant.name : '-'}`;
+            document.getElementById('modal-tenant-name').innerText = `Tenant Pengundang: ${guest.tenant ? guest.tenant.name : 'Tanpa Pengundang'}`;
 
             // Setelan jumlah orang riil
             document.getElementById('modal-adult-count').value = attendance ? attendance.adult_count : (guest.adult_pax || 2);
@@ -845,7 +1020,15 @@
                 resultsDiv.innerHTML = '';
 
                 if (res.guests.length === 0) {
-                    resultsDiv.innerHTML = '<p class="text-xs text-red-500 py-2 text-center font-semibold">Tamu tidak ditemukan pada acara ini.</p>';
+                    const safeKeyword = keyword.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    resultsDiv.innerHTML = `
+                        <div class="p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-2">
+                            <p class="text-xs text-red-500 font-semibold">Tamu tidak ditemukan pada acara ini.</p>
+                            <button type="button" onclick="openWalkInModal('${safeKeyword}')" class="walkin-trigger-btn !text-xs !py-1.5 !px-3 mx-auto">
+                                + Daftarkan sebagai Tamu Walk-In
+                            </button>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -859,17 +1042,141 @@
                     const status = g.is_attended 
                         ? '<span class="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 px-1.5 py-0.5 rounded font-bold">Hadir</span>'
                         : '<span class="text-[10px] bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded">Belum</span>';
+                    const tenantLabel = g.tenant ? g.tenant.name : 'Tanpa Pengundang';
 
                     resultsDiv.innerHTML += `
                         <div onclick="fetchGuestData('${g.qr_code}')" class="p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/60 hover:bg-blue-50 dark:hover:bg-blue-950/40 cursor-pointer flex justify-between items-center transition">
                             <div>
                                 <p class="text-xs font-bold text-slate-800 dark:text-white">${g.name} ${status}</p>
-                                <p class="text-[11px] text-slate-400">Pengundang: ${g.tenant ? g.tenant.name : '-'} | HP: ${g.phone || '-'}</p>
+                                <p class="text-[11px] text-slate-400">Pengundang: ${tenantLabel} | HP: ${g.phone || '-'}</p>
                             </div>
                             <button type="button" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">Pilih</button>
                         </div>
                     `;
                 });
+            });
+        }
+
+        // 10b. Modal Registrasi Tamu Walk-In On-the-Spot
+        function showWalkInToast(message) {
+            const toast = document.getElementById('walkin-toast');
+            const toastText = document.getElementById('walkin-toast-text');
+            if (!toast || !toastText) return;
+            toastText.innerText = message;
+            toast.classList.add('is-visible');
+            setTimeout(() => toast.classList.remove('is-visible'), 4000);
+        }
+
+        function openWalkInModal(prefillKeyword = '') {
+            const eventSel = document.getElementById('event-selector');
+            const eventId = getActiveEventId();
+            if (!eventId) {
+                alert('Tidak ada acara aktif yang tersedia.');
+                return;
+            }
+
+            const eventName = eventSel && eventSel.selectedIndex >= 0
+                ? eventSel.options[eventSel.selectedIndex].text
+                : '';
+            document.getElementById('wi-event-label').innerText = `Acara: ${eventName}`;
+
+            const alertBox = document.getElementById('wi-modal-alert');
+            alertBox.classList.add('hidden');
+            alertBox.innerText = '';
+
+            // Pre-fill nama atau nomor HP jika berasal dari pencarian nihil
+            const cleanDigits = prefillKeyword.replace(/[^0-9+]/g, '');
+            const isPhoneSearch = prefillKeyword && cleanDigits.length >= 6 && cleanDigits.length >= prefillKeyword.length * 0.7;
+            document.getElementById('wi-name').value = isPhoneSearch ? '' : prefillKeyword;
+            document.getElementById('wi-phone').value = isPhoneSearch ? prefillKeyword : '';
+            document.getElementById('wi-adult-count').value = 1;
+            document.getElementById('wi-child-count').value = 0;
+
+            const tenantSelect = document.getElementById('wi-tenant-id');
+            const tableSelect = document.getElementById('wi-table-id');
+            tenantSelect.innerHTML = '<option value="">Tanpa Pengundang (Walk-In Umum)</option>';
+            tableSelect.innerHTML = '<option value="">Tanpa Meja</option>';
+
+            document.getElementById('walkInModal').classList.remove('is-hidden');
+
+            fetch(`/scan/walk-in-options?event_id=${eventId}`, {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (!res.success) return;
+
+                (res.tenants || []).forEach(t => {
+                    tenantSelect.innerHTML += `<option value="${t.id}">${t.name} (Sisa Kuota: ${t.remaining_quota})</option>`;
+                });
+
+                (res.tables || []).forEach(tb => {
+                    const zoneTxt = tb.zone ? ` (${tb.zone})` : '';
+                    const fullTxt = tb.remaining <= 0 ? ' - PENUH' : ` - Sisa ${tb.remaining} Kursi`;
+                    tableSelect.innerHTML += `<option value="${tb.id}">${tb.name}${zoneTxt}${fullTxt}</option>`;
+                });
+            })
+            .catch(err => console.warn('Gagal memuat opsi walk-in:', err));
+        }
+
+        function closeWalkInModal() {
+            document.getElementById('walkInModal').classList.add('is-hidden');
+        }
+
+        function submitWalkIn(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('wi-modal-alert');
+            const submitBtn = document.getElementById('wi-submit-btn');
+
+            const payload = {
+                event_id: getActiveEventId(),
+                name: document.getElementById('wi-name').value.trim(),
+                phone: document.getElementById('wi-phone').value.trim() || null,
+                tenant_id: document.getElementById('wi-tenant-id').value || null,
+                adult_count: parseInt(document.getElementById('wi-adult-count').value || '1', 10),
+                child_count: parseInt(document.getElementById('wi-child-count').value || '0', 10),
+                table_id: document.getElementById('wi-table-id').value || null,
+            };
+
+            alertBox.classList.add('hidden');
+            submitBtn.disabled = true;
+
+            fetch('/scan/walk-in', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(r => r.json().then(data => ({ status: r.status, data })))
+            .then(res => {
+                submitBtn.disabled = false;
+
+                if (!res.data.success) {
+                    playErrorBeep();
+                    alertBox.innerText = res.data.message || 'Gagal mendaftarkan tamu walk-in.';
+                    alertBox.classList.remove('hidden');
+                    return;
+                }
+
+                playSuccessBeep();
+                closeWalkInModal();
+                applyStatsPayload(res.data.stats);
+
+                const searchResults = document.getElementById('search-results');
+                if (searchResults) searchResults.innerHTML = '';
+                const manualInput = document.getElementById('manual-input');
+                if (manualInput) manualInput.value = '';
+
+                showWalkInToast(res.data.message);
+            })
+            .catch(() => {
+                submitBtn.disabled = false;
+                playErrorBeep();
+                alertBox.innerText = 'Gagal terhubung ke server saat menyimpan tamu walk-in.';
+                alertBox.classList.remove('hidden');
             });
         }
 

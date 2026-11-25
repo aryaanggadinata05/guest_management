@@ -107,7 +107,7 @@
                 
                 <!-- Info Tamu -->
                 <p class="txt-guest font-extrabold text-gray-900 leading-tight w-full break-words">{{ $guest->name }}</p>
-                <p class="txt-tenant text-gray-600 font-semibold mt-1 w-full break-words">{{ $guest->tenant->name }}</p>
+                <p class="txt-tenant text-gray-600 font-semibold mt-1 w-full break-words">{{ $guest->tenant?->name ?? 'Tanpa Pengundang' }}</p>
                 
             </div>
         @endforeach
