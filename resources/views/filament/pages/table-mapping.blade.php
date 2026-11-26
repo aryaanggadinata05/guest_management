@@ -374,6 +374,34 @@
             background-color: rgba(47, 118, 181, 0.3);
             border-color: #60a5fa;
         }
+        .tm-tray-name {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .dark .tm-tray-name {
+            color: #f8fafc;
+        }
+        .tm-tray-meta {
+            font-size: 0.625rem;
+            color: #64748b;
+        }
+        .dark .tm-tray-meta {
+            color: #94a3b8;
+        }
+        .tm-tray-zone {
+            font-size: 0.5625rem;
+            padding: 0.1rem 0.375rem;
+            border-radius: 0.25rem;
+            background-color: #e2e8f0;
+            color: #334155;
+            font-weight: 600;
+            margin-top: 0.15rem;
+        }
+        .dark .tm-tray-zone {
+            background-color: #334155;
+            color: #e2e8f0;
+        }
 
         /* Slide-over Drawer */
         .tm-drawer-overlay {
@@ -404,6 +432,223 @@
         @keyframes tmSlideIn {
             from { transform: translateX(100%); }
             to { transform: translateX(0); }
+        }
+        .tm-drawer-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .dark .tm-drawer-header {
+            background-color: #0f172a;
+            border-bottom-color: #334155;
+        }
+        .tm-drawer-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+        .dark .tm-drawer-title {
+            color: #f8fafc;
+        }
+        .tm-drawer-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0.15rem 0 0;
+        }
+        .dark .tm-drawer-subtitle {
+            color: #94a3b8;
+        }
+        .tm-drawer-zone-badge {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            background-color: #e2e8f0;
+            color: #334155;
+        }
+        .dark .tm-drawer-zone-badge {
+            background-color: #334155;
+            color: #e2e8f0;
+        }
+        .tm-drawer-close {
+            padding: 0.375rem;
+            border-radius: 0.625rem;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .tm-drawer-close:hover {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+        .dark .tm-drawer-close {
+            color: #94a3b8;
+        }
+        .dark .tm-drawer-close:hover {
+            background-color: #334155;
+            color: #f8fafc;
+        }
+        .tm-drawer-capacity-box {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .dark .tm-drawer-capacity-box {
+            border-bottom-color: #334155;
+        }
+        .tm-drawer-progress-track {
+            width: 100%;
+            height: 0.625rem;
+            border-radius: 9999px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+        }
+        .dark .tm-drawer-progress-track {
+            background-color: #334155;
+        }
+        .tm-drawer-assign-box {
+            padding: 0.875rem;
+            border-radius: 0.75rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .dark .tm-drawer-assign-box {
+            background-color: #0f172a;
+            border-color: #334155;
+        }
+        .tm-drawer-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #334155;
+            margin: 0;
+        }
+        .dark .tm-drawer-section-title {
+            color: #cbd5e1;
+        }
+        .tm-drawer-panel .tm-select option {
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+        .dark .tm-drawer-panel .tm-select option {
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+        .tm-guest-card {
+            padding: 0.75rem 0.875rem;
+            border-radius: 0.75rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.625rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+        .dark .tm-guest-card {
+            background-color: rgba(15, 23, 42, 0.75);
+            border-color: #334155;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+        .tm-guest-name {
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.25;
+        }
+        .dark .tm-guest-name {
+            color: #f8fafc;
+        }
+        .tm-guest-pax {
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 0.125rem 0.4rem;
+            border-radius: 0.375rem;
+            background-color: #e2e8f0;
+            color: #334155;
+            white-space: nowrap;
+        }
+        .dark .tm-guest-pax {
+            background-color: #334155;
+            color: #e2e8f0;
+        }
+        .tm-guest-meta {
+            font-size: 0.7rem;
+            color: #475569;
+            margin-top: 0.2rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+        }
+        .dark .tm-guest-meta {
+            color: #94a3b8;
+        }
+        .tm-status-attended {
+            color: #059669;
+            font-weight: 700;
+        }
+        .dark .tm-status-attended {
+            color: #34d399;
+        }
+        .tm-status-pending {
+            color: #64748b;
+            font-weight: 600;
+        }
+        .dark .tm-status-pending {
+            color: #94a3b8;
+        }
+        .tm-unassign-btn {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.35rem 0.65rem;
+            border-radius: 0.5rem;
+            color: #dc2626;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .tm-unassign-btn:hover {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+        }
+        .dark .tm-unassign-btn {
+            color: #fca5a5;
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+        }
+        .dark .tm-unassign-btn:hover {
+            background-color: rgba(239, 68, 68, 0.28);
+        }
+        .tm-drawer-empty {
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 0.75rem;
+        }
+        .dark .tm-drawer-empty {
+            color: #94a3b8;
+            background-color: rgba(15, 23, 42, 0.45);
+            border-color: #334155;
         }
 
         /* Fullscreen Mode & Floating Toolbar */
@@ -1075,10 +1320,10 @@
                                  class="tm-tray-item"
                                  :class="{ 'is-selected': selectedTableForPosition == {{ $unmappedTable->id }} }"
                                  wire:click="selectTableForPosition({{ $unmappedTable->id }})">
-                                <span class="text-xs font-black text-slate-800 dark:text-slate-100">{{ $unmappedTable->name }}</span>
-                                <span class="text-[10px] text-slate-500">{{ $unmappedTable->capacity }} Kursi</span>
+                                <span class="tm-tray-name">{{ $unmappedTable->name }}</span>
+                                <span class="tm-tray-meta">{{ $unmappedTable->capacity }} Kursi</span>
                                 @if($unmappedTable->zone)
-                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold mt-0.5">
+                                    <span class="tm-tray-zone">
                                         {{ $unmappedTable->zone }}
                                     </span>
                                 @endif
@@ -1153,21 +1398,21 @@
             <div class="tm-drawer-overlay" wire:click.self="closeTableDrawer">
                 <div class="tm-drawer-panel">
                     {{-- Header Drawer --}}
-                    <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900/60">
+                    <div class="tm-drawer-header">
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-black text-slate-900 dark:text-slate-100">{{ $activeTable->name }}</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <h3 class="tm-drawer-title">{{ $activeTable->name }}</h3>
                                 @if($activeTable->zone)
-                                    <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                    <span class="tm-drawer-zone-badge">
                                         {{ $activeTable->zone }}
                                     </span>
                                 @endif
                             </div>
                             @if($activeTable->pic_name)
-                                <p class="text-xs text-slate-500 dark:text-slate-400">PIC: {{ $activeTable->pic_name }}</p>
+                                <p class="tm-drawer-subtitle">PIC: {{ $activeTable->pic_name }}</p>
                             @endif
                         </div>
-                        <button type="button" wire:click="closeTableDrawer" class="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 transition">
+                        <button type="button" wire:click="closeTableDrawer" class="tm-drawer-close" aria-label="Tutup panel">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -1175,33 +1420,32 @@
                     </div>
 
                     {{-- Kapasitas & Progress Bar --}}
-                    <div class="p-4 border-b border-slate-200 dark:border-slate-700 space-y-2">
-                        <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-slate-600 dark:text-slate-400">Kapasitas Kursi:</span>
-                            <span class="text-slate-900 dark:text-slate-100">
-                                Terisi <span class="text-blue-600 dark:text-blue-400">{{ $tableOccupied }}</span> / {{ $activeTable->capacity }}
-                                (Sisa: <span class="{{ $tableRemaining > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $tableRemaining }}</span>)
+                    <div class="tm-drawer-capacity-box">
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
+                            <span class="tm-guest-meta" style="margin-top: 0;">Kapasitas Kursi:</span>
+                            <span class="tm-guest-name" style="font-size: 0.75rem;">
+                                Terisi <span style="color: var(--brand-primary);">{{ $tableOccupied }}</span> / {{ $activeTable->capacity }}
+                                (Sisa: <span style="color: {{ $tableRemaining > 0 ? '#10b981' : '#ef4444' }};">{{ $tableRemaining }}</span>)
                             </span>
                         </div>
-                        <div class="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                            <div class="h-full rounded-full transition-all duration-300"
-                                 style="width: {{ $capacityPercent }}%; background-color: {{ $activeTable->getStatusColor() }};"></div>
+                        <div class="tm-drawer-progress-track">
+                            <div style="height: 100%; border-radius: 9999px; transition: width 0.3s ease; width: {{ $capacityPercent }}%; background-color: {{ $activeTable->getStatusColor() }};"></div>
                         </div>
                     </div>
 
                     {{-- Body Drawer: Form Assign & Daftar Tamu --}}
-                    <div class="p-4 space-y-5 flex-1 overflow-y-auto">
+                    <div style="padding: 1rem; display: flex; flex-direction: column; gap: 1.25rem; flex: 1; overflow-y: auto;">
                         {{-- Form Cepat Plotting Tamu --}}
-                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 space-y-3">
-                            <div class="flex items-center justify-between">
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        <div class="tm-drawer-assign-box">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <h4 class="tm-drawer-section-title">
                                     Plot Tamu ke Meja Ini
                                 </h4>
-                                <span class="text-[10px] text-slate-400">{{ $unassignedGuests->count() }} Belum Punya Meja</span>
+                                <span class="tm-drawer-subtitle" style="margin-top: 0; font-size: 0.6875rem;">{{ $unassignedGuests->count() }} Belum Punya Meja</span>
                             </div>
 
-                            <div class="space-y-2">
-                                <select wire:model="selectedGuestToAssign" class="tm-select w-full text-xs">
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <select wire:model="selectedGuestToAssign" class="tm-select" style="width: 100%; font-size: 0.75rem;">
                                     <option value="">-- Pilih Tamu yang Belum Ditempatkan --</option>
                                     @foreach($unassignedGuests as $ug)
                                         @php
@@ -1216,7 +1460,8 @@
 
                                 <button type="button"
                                         wire:click="assignGuest"
-                                        class="tm-btn tm-btn-primary w-full !py-2 justify-center">
+                                        class="tm-btn tm-btn-primary"
+                                        style="width: 100%; padding-top: 0.5rem; padding-bottom: 0.5rem; justify-content: center;">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                     </svg>
@@ -1226,35 +1471,32 @@
                         </div>
 
                         {{-- Daftar Tamu Meja Tersebut --}}
-                        <div class="space-y-2.5">
-                            <div class="flex items-center justify-between">
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        <div style="display: flex; flex-direction: column; gap: 0.625rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <h4 class="tm-drawer-section-title">
                                     Daftar Tamu di Meja ({{ $activeTable->guests->count() }})
                                 </h4>
                             </div>
 
-                            <div class="space-y-2">
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                                 @forelse($activeTable->guests as $tableGuest)
                                     @php
                                         $tgPax = ((int) $tableGuest->adult_pax + (int) $tableGuest->child_pax);
                                         if ($tgPax <= 0) $tgPax = 1;
                                     @endphp
-                                    <div wire:key="table-guest-{{ $tableGuest->id }}"
-                                         class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2 shadow-sm">
-                                        <div>
-                                            <div class="flex items-center gap-1.5">
-                                                <span class="text-xs font-bold text-slate-800 dark:text-slate-100">{{ $tableGuest->name }}</span>
-                                                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                                                    {{ $tgPax }} pax
-                                                </span>
+                                    <div wire:key="table-guest-{{ $tableGuest->id }}" class="tm-guest-card">
+                                        <div style="min-width: 0;">
+                                            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem;">
+                                                <span class="tm-guest-name">{{ $tableGuest->name }}</span>
+                                                <span class="tm-guest-pax">{{ $tgPax }} pax</span>
                                             </div>
-                                            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+                                            <div class="tm-guest-meta">
                                                 <span>{{ $tableGuest->tenant?->name ?? 'Tanpa Pengundang' }}</span>
-                                                <span>•</span>
+                                                <span>&bull;</span>
                                                 @if($tableGuest->is_attended)
-                                                    <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Hadir</span>
+                                                    <span class="tm-status-attended">Hadir</span>
                                                 @else
-                                                    <span class="text-slate-400">Belum Hadir</span>
+                                                    <span class="tm-status-pending">Belum Hadir</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -1262,13 +1504,13 @@
                                         <button type="button"
                                                 wire:click="unassignGuest({{ $tableGuest->id }})"
                                                 wire:confirm="Yakin ingin mengeluarkan {{ $tableGuest->name }} dari meja ini?"
-                                                class="text-xs font-semibold px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 transition"
+                                                class="tm-unassign-btn"
                                                 title="Keluarkan dari Meja">
                                             Keluarkan
                                         </button>
                                     </div>
                                 @empty
-                                    <div class="p-6 text-center text-xs text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                                    <div class="tm-drawer-empty">
                                         Belum ada tamu yang diplot ke meja ini.
                                     </div>
                                 @endforelse

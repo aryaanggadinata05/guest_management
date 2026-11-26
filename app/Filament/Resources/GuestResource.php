@@ -182,10 +182,16 @@ class GuestResource extends Resource
                 TextColumn::make('wa_sent_at')
                     ->label('Undangan WA')
                     ->badge()
-                    ->color(fn (?string $state): string => $state ? 'success' : 'gray')
-                    ->formatStateUsing(fn (?string $state): string => $state ? 'Terkirim ('.date('d/m H:i', strtotime($state)).')' : 'Belum Dikirim')
-                    ->placeholder('Belum Dikirim')
-                    ->default('Belum Dikirim')
+                    ->getStateUsing(function (Guest $record): string {
+                        $sentAt = $record->wa_sent_at;
+
+                        if (! $sentAt || $sentAt->year <= 2000) {
+                            return 'Belum Terkirim';
+                        }
+
+                        return 'Terkirim ('.$sentAt->format('d/m H:i').')';
+                    })
+                    ->color(fn (string $state): string => str_starts_with($state, 'Terkirim') ? 'success' : 'gray')
                     ->sortable(),
 
                 TextColumn::make('attendance.scanned_at')

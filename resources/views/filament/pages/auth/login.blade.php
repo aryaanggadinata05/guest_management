@@ -261,7 +261,7 @@
 
         {{-- Footer Hak Cipta --}}
         <p class="gm-login-footer">
-            &copy; {{ date('Y') }} {{ $settings->app_name ?: 'Guest Management' }}. Hak Cipta Dilindungi.
+            &copy; 2026 Guest Management System &bull; AAA-05
         </p>
     </div>
 </div>

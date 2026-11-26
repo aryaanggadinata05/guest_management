@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -34,8 +35,16 @@ class Event extends Model
 
     public function getFloorPlanUrl(): ?string
     {
-        return filled($this->floor_plan_image)
-            ? asset('storage/'.ltrim($this->floor_plan_image, '/'))
-            : null;
+        if (blank($this->floor_plan_image)) {
+            return null;
+        }
+
+        $path = ltrim($this->floor_plan_image, '/');
+
+        if (! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        return '/storage/'.$path;
     }
 }

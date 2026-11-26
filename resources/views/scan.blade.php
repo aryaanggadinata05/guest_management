@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="AAA-05">
+    <meta name="copyright" content="Copyright (c) 2026 AAA-05. All rights reserved.">
     <title>Meja Registrasi & Scanner QR - {{ $settings->app_name ?? 'Guest Management' }}</title>
     @if($settings->getFaviconUrl())
         <link rel="icon" href="{{ $settings->getFaviconUrl() }}">
@@ -487,6 +489,10 @@
             </div>
 
         </div>
+
+        <footer style="text-align: center; padding: 0.75rem 0.5rem 0.25rem; font-size: 0.75rem; font-weight: 500; opacity: 0.68;">
+            &copy; 2026 Guest Management System &bull; AAA-05
+        </footer>
 
     </div>
 

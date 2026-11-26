@@ -1,6 +1,8 @@
 @php
     $settings = \App\Models\Setting::get();
 @endphp
+<meta name="author" content="AAA-05">
+<meta name="copyright" content="Copyright (c) 2026 AAA-05. All rights reserved.">
 <style>
     :root {
         --brand-primary: {{ $settings->primary_color ?? '#2f76b5' }};
@@ -156,7 +158,7 @@
     }
 
     /* Light Mode Topbar */
-    body:not(.dark) .fi-topbar nav {
+    html:not(.dark) .fi-topbar nav {
         background: #ffffff !important;
         border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
@@ -181,43 +183,68 @@
         visibility: visible !important;
     }
 
-    body:not(.dark) .fi-dropdown-panel {
+    html:not(.dark) .fi-dropdown-panel {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
     }
 
-    body:not(.dark) .fi-dropdown-list-item-label,
-    body:not(.dark) .fi-dropdown-header-label,
-    body:not(.dark) .fi-dropdown-list-item,
-    body:not(.dark) .fi-dropdown-panel button,
-    body:not(.dark) .fi-dropdown-panel span {
-        color: #1e293b !important;
+    html:not(.dark) .fi-dropdown-header,
+    html:not(.dark) .fi-dropdown-header-label,
+    html:not(.dark) .fi-dropdown-list-item,
+    html:not(.dark) .fi-dropdown-list-item-label {
+        color: #0f172a !important;
     }
 
-    body:not(.dark) .fi-dropdown-list-item-icon {
+    html:not(.dark) .fi-dropdown-list-item-icon {
         color: #475569 !important;
+    }
+
+    html:not(.dark) .fi-theme-switcher-btn {
+        color: #64748b !important;
+    }
+
+    html:not(.dark) .fi-theme-switcher-btn:hover,
+    html:not(.dark) .fi-theme-switcher-btn[aria-pressed="true"],
+    html:not(.dark) .fi-theme-switcher-btn.fi-active {
+        color: var(--brand-primary) !important;
     }
 
     html.dark .fi-dropdown-panel,
     .dark .fi-dropdown-panel {
         background-color: #1e293b !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+        border: 1px solid #334155 !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.55) !important;
     }
 
-    html.dark .fi-dropdown-list-item-label,
+    html.dark .fi-dropdown-header,
     html.dark .fi-dropdown-header-label,
     html.dark .fi-dropdown-list-item,
-    .dark .fi-dropdown-list-item-label,
+    html.dark .fi-dropdown-list-item-label,
+    .dark .fi-dropdown-header,
     .dark .fi-dropdown-header-label,
-    .dark .fi-dropdown-list-item {
+    .dark .fi-dropdown-list-item,
+    .dark .fi-dropdown-list-item-label {
         color: #f8fafc !important;
     }
 
     html.dark .fi-dropdown-list-item-icon,
     .dark .fi-dropdown-list-item-icon {
         color: #94a3b8 !important;
+    }
+
+    html.dark .fi-theme-switcher-btn,
+    .dark .fi-theme-switcher-btn {
+        color: #94a3b8 !important;
+    }
+
+    html.dark .fi-theme-switcher-btn:hover,
+    html.dark .fi-theme-switcher-btn[aria-pressed="true"],
+    html.dark .fi-theme-switcher-btn.fi-active,
+    .dark .fi-theme-switcher-btn:hover,
+    .dark .fi-theme-switcher-btn[aria-pressed="true"],
+    .dark .fi-theme-switcher-btn.fi-active {
+        color: #f8fafc !important;
     }
 
     /* ==========================================================================
@@ -228,8 +255,8 @@
     }
 
     /* Light Mode Background with subtle radial brand glow */
-    body:not(.dark) body.fi-body,
-    body:not(.dark) .fi-main {
+    html:not(.dark) body.fi-body,
+    html:not(.dark) .fi-main {
         background: radial-gradient(circle at 100% 0%, rgba(47, 118, 181, 0.06) 0%, transparent 45%), #f8fafc !important;
     }
 
@@ -252,9 +279,9 @@
     }
 
     /* Light Mode Cards */
-    body:not(.dark) .fi-wi-stats-overview-stat,
-    body:not(.dark) .fi-section,
-    body:not(.dark) .fi-ta-ctn {
+    html:not(.dark) .fi-wi-stats-overview-stat,
+    html:not(.dark) .fi-section,
+    html:not(.dark) .fi-ta-ctn {
         background: #ffffff !important;
         border: 1px solid rgba(226, 232, 240, 0.8) !important;
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04) !important;

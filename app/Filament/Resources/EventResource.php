@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class EventResource extends Resource
 {
@@ -54,12 +55,20 @@ class EventResource extends Resource
                     ->directory('floor-plans')
                     ->visibility('public')
                     ->fetchFileInformation(false)
-                    ->getUploadedFileUsing(static fn (BaseFileUpload $component, string $file): ?array => [
-                        'name' => basename($file),
-                        'size' => 0,
-                        'type' => null,
-                        'url' => '/storage/'.ltrim($file, '/'),
-                    ])
+                    ->getUploadedFileUsing(static function (BaseFileUpload $component, string $file): ?array {
+                        $path = ltrim($file, '/');
+
+                        if (! Storage::disk('public')->exists($path)) {
+                            return null;
+                        }
+
+                        return [
+                            'name' => basename($path),
+                            'size' => 0,
+                            'type' => null,
+                            'url' => '/storage/'.$path,
+                        ];
+                    })
                     ->helperText('Unggah gambar denah venue/ballroom (PNG, JPG, WebP) sebagai latar belakang pemetaan meja.')
                     ->columnSpanFull(),
             ]);

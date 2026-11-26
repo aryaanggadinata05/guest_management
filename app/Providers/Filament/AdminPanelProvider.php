@@ -58,6 +58,14 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::HEAD_END,
                 fn () => view('filament.components.theme-styles', ['settings' => Setting::get()])
             )
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
+                fn () => view('filament.components.ownership-footer', ['compact' => false])
+            )
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn () => view('filament.components.ownership-footer', ['compact' => true])
+            )
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(MaxWidth::Full)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

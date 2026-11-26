@@ -15,6 +15,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Controller untuk halaman Meja Registrasi (/scan), verifikasi QR, check-in, dan Walk-In.
+ *
+ * @author AAA-05
+ * @copyright Copyright (c) 2026 AAA-05
+ */
 class ScanController extends Controller
 {
     public function index(): View

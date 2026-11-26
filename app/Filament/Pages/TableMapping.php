@@ -10,6 +10,12 @@ use App\Models\Tenant;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
+/**
+ * Halaman Visual Floor Plan & Table Plotting (/denah-meja).
+ *
+ * @author AAA-05
+ * @copyright Copyright (c) 2026 AAA-05
+ */
 class TableMapping extends Page
 {
     protected static ?string $title = 'Denah & Plotting Meja';

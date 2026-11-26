@@ -6,6 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware pembatasan akses panel berdasarkan peran pengguna (Admin, Tenant, Register).
+ *
+ * @author AAA-05
+ * @copyright Copyright (c) 2026 AAA-05
+ */
 class CheckRoleAccess
 {
     public function handle(Request $request, Closure $next): Response

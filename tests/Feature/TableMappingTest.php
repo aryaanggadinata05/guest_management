@@ -10,6 +10,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -211,5 +212,32 @@ class TableMappingTest extends TestCase
 
         $guest->refresh();
         $this->assertNull($guest->table_id);
+    }
+
+    public function test_event_get_floor_plan_url_returns_relative_path_only_when_file_exists(): void
+    {
+        Storage::fake('public');
+
+        $eventMissing = Event::create([
+            'name' => 'Event Missing File',
+            'location' => 'Jakarta',
+            'start_date' => now()->toDateString(),
+            'is_active' => true,
+            'floor_plan_image' => 'floor-plans/nonexistent.png',
+        ]);
+
+        $this->assertNull($eventMissing->getFloorPlanUrl());
+
+        Storage::disk('public')->put('floor-plans/valid-plan.png', 'dummy-image-bytes');
+
+        $eventValid = Event::create([
+            'name' => 'Event Valid File',
+            'location' => 'Jakarta',
+            'start_date' => now()->toDateString(),
+            'is_active' => true,
+            'floor_plan_image' => 'floor-plans/valid-plan.png',
+        ]);
+
+        $this->assertEquals('/storage/floor-plans/valid-plan.png', $eventValid->getFloorPlanUrl());
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\ManageSettings;
+use App\Filament\Resources\GuestResource;
 use App\Models\Event;
 use App\Models\Guest;
 use App\Models\Setting;
@@ -177,5 +178,46 @@ class WhatsAppInvitationTest extends TestCase
             return $request->url() === 'https://api.fonnte.com/send' &&
                 $request->hasHeader('Authorization', 'dummy_token_123');
         });
+    }
+
+    public function test_guest_resource_undangan_wa_column_displays_belum_terkirim_when_unsent_or_invalid_epoch(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $tenant = Tenant::create(['name' => 'Bank BRI']);
+        $event = Event::create([
+            'name' => 'Signature In Style',
+            'location' => 'Ballroom',
+            'start_date' => '2026-11-26',
+            'is_active' => true,
+        ]);
+
+        $unsentGuest = Guest::create([
+            'tenant_id' => $tenant->id,
+            'event_id' => $event->id,
+            'name' => 'Tamu Belum WA',
+            'wa_sent_at' => null,
+        ]);
+
+        $epochGuest = Guest::create([
+            'tenant_id' => $tenant->id,
+            'event_id' => $event->id,
+            'name' => 'Tamu Epoch WA',
+            'wa_sent_at' => '1970-01-01 00:00:00',
+        ]);
+
+        $sentAt = now();
+        $sentGuest = Guest::create([
+            'tenant_id' => $tenant->id,
+            'event_id' => $event->id,
+            'name' => 'Tamu Sudah WA',
+            'wa_sent_at' => $sentAt,
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(GuestResource\Pages\ListGuests::class)
+            ->assertCanSeeTableRecords([$unsentGuest, $epochGuest, $sentGuest])
+            ->assertSee('Belum Terkirim')
+            ->assertSee('Terkirim ('.$sentAt->format('d/m H:i').')')
+            ->assertDontSee('01/01 07:00');
     }
 }
